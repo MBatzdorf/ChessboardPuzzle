@@ -121,14 +121,15 @@ class ChessBoard(QtWidgets.QWidget):
         for piece in self.pieces:
             piece.update()
 
-        for e in range(boarSize):
-            uniqueX, countsX = np.unique(pieceValues[:,e], return_counts=True)
-            dict(zip(uniqueX, countsX))
-            self.horizontalStats[e].setText("B:" + str(cx1) + " R:" + str(cx2)) # TODO: Causes a crash if all pieces of a column contain identical values
+        colZeros = np.count_nonzero(pieceValues == 0, axis=1)
+        colOnes = np.count_nonzero(pieceValues == 1, axis=1)
 
-            uniqueY, countsY = np.unique(pieceValues[e], return_counts=True)
-            dict(zip(uniqueY, countsY))
-            self.verticalStats[e].setText(" B:" + str(cy1) + " R:" + str(cy2)) # TODO: Causes a crash if all pieces of a row contain identical values
+        rowZeros = np.count_nonzero(pieceValues == 0, axis=0)
+        rowOnes = np.count_nonzero(pieceValues == 1, axis=0)
+
+        for e in range(boarSize):
+            self.verticalStats[e].setText(" B:" + str(colZeros[e]) + " R:" + str(colOnes[e]))
+            self.horizontalStats[e].setText(" B:" + str(rowZeros[e]) + " R:" + str(rowOnes[e]))
 
 
 

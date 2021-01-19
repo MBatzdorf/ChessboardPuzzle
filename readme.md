@@ -10,5 +10,3 @@
   - Left click: Flip a coin
   - Right click: Change the chessboard piece where the "cell key" is located
  
-### Known Issues:
-Crashes if all elements of a row or column contain the same values (aka coint colors)
