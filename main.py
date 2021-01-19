@@ -3,7 +3,7 @@ from random import randrange
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 
-boarSize = 5
+boarSize = 8
 colorForZeros = QtGui.QColor('blue')
 colorForOnes = QtGui.QColor('red')
 colorForKeyCoordinate = QtGui.QColor('yellow')
@@ -109,14 +109,15 @@ class ChessBoard(QtWidgets.QWidget):
         for piece in self.pieces:
             piece.update()
 
-        for e in range(boarSize):
-            uniqueX, countsX = np.unique(pieceValues[:,e], return_counts=True)
-            dict(zip(uniqueX, countsX))
-            self.horizontalStats[e].setText("B:" + str(countsX[0]) + " R:" + str(countsX[1])) # TODO: Causes a crash if all pieces of a column contain identical values
+        colZeros = np.count_nonzero(pieceValues == 0, axis=1)
+        colOnes = np.count_nonzero(pieceValues == 1, axis=1)
 
-            uniqueY, countsY = np.unique(pieceValues[e], return_counts=True)
-            dict(zip(uniqueY, countsY))
-            self.verticalStats[e].setText(" B:" + str(countsY[0]) + " R:" + str(countsY[1])) # TODO: Causes a crash if all pieces of a row contain identical values
+        rowZeros = np.count_nonzero(pieceValues == 0, axis=0)
+        rowOnes = np.count_nonzero(pieceValues == 1, axis=0)
+
+        for e in range(boarSize):
+            self.verticalStats[e].setText(" B:" + str(colZeros[e]) + " R:" + str(colOnes[e]))
+            self.horizontalStats[e].setText(" B:" + str(rowZeros[e]) + " R:" + str(rowOnes[e]))
 
 
 
