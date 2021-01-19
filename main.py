@@ -1,9 +1,9 @@
 import numpy as np
-from random import randrange
+from random import random, randrange
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 
-boarSize = 5
+boarSize = 8
 colorForZeros = QtGui.QColor('blue')
 colorForOnes = QtGui.QColor('red')
 colorForKeyCoordinate = QtGui.QColor('yellow')
@@ -79,11 +79,23 @@ class ChessBoard(QtWidgets.QWidget):
         self.layout.setContentsMargins(0, 0, 0, 0)
         self.layout.setSpacing(0)
 
-        self.labelDeterminant = QtWidgets.QLabel('Determinant: ' + str(np.linalg.det(pieceValues)))
+        self.labelDeterminant = QtWidgets.QLabel('Determinant: ' + str(np.linalg.det(pieceValues), 2))
         self.layout.addWidget(self.labelDeterminant, boarSize + 2, 0, 1, boarSize + 2)
+
+        self.buttonRandomize = QtWidgets.QPushButton('Randomize Layout')
+        self.buttonRandomize.clicked.connect(self.buttonRandClick)
+        self.layout.addWidget(self.buttonRandomize, boarSize + 2, boarSize - 1, 1, boarSize + 2)
         
         self.fillGrid()
 
+
+    def buttonRandClick(self):
+        for i in range(boarSize):
+            for j in range(boarSize):
+                pieceValues[i, j] = np.random.randint(0,2)
+        keyCoordinate[0] = np.random.randint(0, boarSize)
+        keyCoordinate[1] = np.random.randint(0, boarSize)
+        self.redraw()
 
     def fillGrid(self):
         for counterX, valueX in enumerate(pieceValues):
@@ -112,11 +124,11 @@ class ChessBoard(QtWidgets.QWidget):
         for e in range(boarSize):
             uniqueX, countsX = np.unique(pieceValues[:,e], return_counts=True)
             dict(zip(uniqueX, countsX))
-            self.horizontalStats[e].setText("B:" + str(countsX[0]) + " R:" + str(countsX[1])) # TODO: Causes a crash if all pieces of a column contain identical values
+            self.horizontalStats[e].setText("B:" + str(cx1) + " R:" + str(cx2)) # TODO: Causes a crash if all pieces of a column contain identical values
 
             uniqueY, countsY = np.unique(pieceValues[e], return_counts=True)
             dict(zip(uniqueY, countsY))
-            self.verticalStats[e].setText(" B:" + str(countsY[0]) + " R:" + str(countsY[1])) # TODO: Causes a crash if all pieces of a row contain identical values
+            self.verticalStats[e].setText(" B:" + str(cy1) + " R:" + str(cy2)) # TODO: Causes a crash if all pieces of a row contain identical values
 
 
 
