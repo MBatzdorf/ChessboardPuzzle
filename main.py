@@ -1,21 +1,24 @@
 import numpy as np
 from random import random, randrange
-from PyQt5 import QtCore, QtGui, QtWidgets, sip
+from PyQt5.QtWidgets import QApplication, QWidget, QGridLayout, QLabel, QPushButton, QLineEdit, QVBoxLayout, QGroupBox
+from PyQt5.QtCore import pyqtSignal, Qt, QRect, pyqtSlot
+from PyQt5.QtGui import QColor, QPainter, QBrush, QIntValidator
+from PyQt5 import sip
 
 
 
-class Piece(QtWidgets.QWidget):
+class Piece(QWidget):
 
-    colorForZeros = QtGui.QColor('blue')
-    colorForOnes = QtGui.QColor('red')
-    colorForKeyCoordinate = QtGui.QColor('yellow')
+    colorForZeros = QColor('blue')
+    colorForOnes = QColor('red')
+    colorForKeyCoordinate = QColor('yellow')
 
     x = 0 # Horizontal board position
     y = 0 # Vertical board position
     value = 0 # determines the color
     isKeyCoordinate = False
 
-    onStatusChanged = QtCore.pyqtSignal()
+    onStatusChanged = pyqtSignal()
 
     def __init__(self, x, y, value, isKeyCoordinate):
         super(Piece, self).__init__()
@@ -28,8 +31,8 @@ class Piece(QtWidgets.QWidget):
         if self.isKeyCoordinate:
             return self.colorForKeyCoordinate
         elif self.x % 2 and not self.y % 2 or self.y % 2 and not self.x % 2:
-            return QtGui.QColor('grey')
-        return QtGui.QColor('white')
+            return QColor('grey')
+        return QColor('white')
 
 
     def getCircleColor(self):
@@ -38,35 +41,35 @@ class Piece(QtWidgets.QWidget):
         return self.colorForOnes
 
 
-    @QtCore.pyqtSlot(QtWidgets.QWidget)
+    @pyqtSlot(QWidget)
     def mousePressEvent(self, event):
-        if event.buttons() == QtCore.Qt.LeftButton:
+        if event.buttons() == Qt.LeftButton:
             if self.value == 0:
                 self.value = 1
             else:
                 self.value = 0
-        if event.buttons() == QtCore.Qt.RightButton:
+        if event.buttons() == Qt.RightButton:
             self.isKeyCoordinate = True
         self.update()        
         self.onStatusChanged.emit()
 
 
-    @QtCore.pyqtSlot(QtWidgets.QWidget)
+    @pyqtSlot(QWidget)
     def paintEvent(self, event):        
         fieldColor = self.getFieldColor()
-        painter = QtGui.QPainter(self)        
-        brush = QtGui.QBrush(fieldColor, QtCore.Qt.SolidPattern)
-        rect = QtCore.QRect(0,0, self.geometry().width(), self.geometry().height())
+        painter = QPainter(self)        
+        brush = QBrush(fieldColor, Qt.SolidPattern)
+        rect = QRect(0,0, self.geometry().width(), self.geometry().height())
         painter.fillRect(rect, brush)
         painter.drawRect(rect)
 
         circleColor = self.getCircleColor()
-        painter.setBrush(QtGui.QBrush(circleColor, QtCore.Qt.SolidPattern))
+        painter.setBrush(QBrush(circleColor, Qt.SolidPattern))
         painter.drawEllipse(5, 5, self.geometry().width() - 10, self.geometry().height() - 10)
 
 
 
-class ChessBoard(QtWidgets.QWidget):
+class ChessBoard(QWidget):
 
     boardSize = 8
     pieceValues = np.random.randint(0, 2, size=(boardSize,boardSize))
@@ -95,29 +98,28 @@ class ChessBoard(QtWidgets.QWidget):
         self.horizontalStats.clear()
         self.verticalStats.clear()
 
-        self.layout = QtWidgets.QGridLayout(self)
+        self.layout = QGridLayout(self)
         self.layout.setContentsMargins(0, 0, 0, 0)
         self.layout.setSpacing(0)
 
-        self.labelDeterminant = QtWidgets.QLabel('Determinant: ' + str(np.linalg.det(self.pieceValues)))
+        self.labelDeterminant = QLabel('Determinant: ' + str(np.linalg.det(self.pieceValues)))
         self.layout.addWidget(self.labelDeterminant, self.boardSize + 2, 0, 1, self.boardSize + 2)
 
-        self.buttonRandomize = QtWidgets.QPushButton('Randomize Layout')
+        self.buttonRandomize = QPushButton('Randomize Layout')
         self.buttonRandomize.clicked.connect(self.buttonRandClick)
         self.layout.addWidget(self.buttonRandomize, self.boardSize + 3, 0, 1, self.boardSize + 2)
 
-        self.boardSizeLabel = QtWidgets.QLabel(self)
+        self.boardSizeLabel = QLabel(self)
         self.boardSizeLabel.setText('Board size:')
         self.layout.addWidget(self.boardSizeLabel, self.boardSize + 4, 0, 1, self.boardSize / 2)
 
-        self.boardSizeEdit = QtWidgets.QLineEdit(self)
+        self.boardSizeEdit = QLineEdit(self)
         self.boardSizeEdit.setMaxLength(1)
-        self.boardSizeEdit.setValidator(QtGui.QIntValidator(4, 8))
+        self.boardSizeEdit.setValidator(QIntValidator(4, 8))
         self.boardSizeEdit.textChanged.connect(self.textChanged)
         self.layout.addWidget(self.boardSizeEdit, self.boardSize + 4, 1, 1, self.boardSize / 2)
         
         self.fillGrid()
-
 
 
     def textChanged(self, newNum):
@@ -159,11 +161,11 @@ class ChessBoard(QtWidgets.QWidget):
         for counterX, valueX in enumerate(self.pieceValues):
             for counterY, valueY in enumerate(valueX):
                 if counterX == self.boardSize - 1:
-                    pieceCounterX = QtWidgets.QLabel("")
+                    pieceCounterX = QLabel("")
                     self.layout.addWidget(pieceCounterX, counterX + 1, counterY)
                     self.horizontalStats.append(pieceCounterX)
                 if counterY == self.boardSize - 1:
-                    pieceCounterY = QtWidgets.QLabel("")
+                    pieceCounterY = QLabel("")
                     self.layout.addWidget(pieceCounterY, counterX, counterY + 1)
                     self.verticalStats.append(pieceCounterY)
 
@@ -175,7 +177,7 @@ class ChessBoard(QtWidgets.QWidget):
         self.redraw()
 
 
-    @QtCore.pyqtSlot()
+    @pyqtSlot()
     def updatePieces(self):        
         clickedX = self.sender().x
         clickedY = self.sender().y
@@ -208,14 +210,14 @@ class ChessBoard(QtWidgets.QWidget):
 
 
 
-class MainWindow(QtWidgets.QWidget):
+class MainWindow(QWidget):
     def __init__(self):
         super(MainWindow, self).__init__()
 
         self.setWindowTitle("Chessboard Puzzle")
         self.setGeometry(0, 0, 600, 600)
 
-        layout = QtWidgets.QVBoxLayout(self)        
+        layout = QVBoxLayout(self)        
         layout.setContentsMargins(25, 25, 0, 0)
         layout.setSpacing(0)
 
@@ -225,7 +227,7 @@ class MainWindow(QtWidgets.QWidget):
 
 
 if __name__ == "__main__":
-    app = QtWidgets.QApplication([])
+    app = QApplication([])
     window = MainWindow()
     window.show()
     app.exec_()
