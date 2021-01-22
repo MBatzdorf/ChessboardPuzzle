@@ -101,25 +101,35 @@ class ChessBoard(QWidget):
         self.layout = QGridLayout(self)
         self.layout.setContentsMargins(0, 0, 0, 0)
         self.layout.setSpacing(0)
+        
+        self.layout.addWidget(self.createControlPanel(), self.boardSize + 1, 0, 1, self.boardSize + 1)
+        self.createGrid()
+
+
+    def createControlPanel(self):
+        groupBox = QGroupBox()
 
         self.labelDeterminant = QLabel('Determinant: ' + str(np.linalg.det(self.pieceValues)))
-        self.layout.addWidget(self.labelDeterminant, self.boardSize + 2, 0, 1, self.boardSize + 2)
 
         self.buttonRandomize = QPushButton('Randomize Layout')
         self.buttonRandomize.clicked.connect(self.buttonRandClick)
-        self.layout.addWidget(self.buttonRandomize, self.boardSize + 3, 0, 1, self.boardSize + 2)
 
         self.boardSizeLabel = QLabel(self)
         self.boardSizeLabel.setText('Board size:')
-        self.layout.addWidget(self.boardSizeLabel, self.boardSize + 4, 0, 1, self.boardSize / 2)
 
         self.boardSizeEdit = QLineEdit(self)
         self.boardSizeEdit.setMaxLength(1)
         self.boardSizeEdit.setValidator(QIntValidator(4, 8))
         self.boardSizeEdit.textChanged.connect(self.textChanged)
-        self.layout.addWidget(self.boardSizeEdit, self.boardSize + 4, 1, 1, self.boardSize / 2)
-        
-        self.fillGrid()
+
+        vbox = QVBoxLayout()
+        vbox.addWidget(self.labelDeterminant)
+        vbox.addWidget(self.buttonRandomize)
+        vbox.addWidget(self.boardSizeLabel)
+        vbox.addWidget(self.boardSizeEdit)
+        groupBox.setLayout(vbox)
+
+        return groupBox
 
 
     def textChanged(self, newNum):
@@ -157,7 +167,7 @@ class ChessBoard(QWidget):
         self.redraw()
 
 
-    def fillGrid(self):
+    def createGrid(self):
         for counterX, valueX in enumerate(self.pieceValues):
             for counterY, valueY in enumerate(valueX):
                 if counterX == self.boardSize - 1:
@@ -171,14 +181,14 @@ class ChessBoard(QWidget):
 
                 isKeyCoord = counterX == self.keyCoordinate[0] and counterY == self.keyCoordinate[1]
                 piece = Piece(counterX, counterY, valueY, isKeyCoord)
-                piece.onStatusChanged.connect(self.updatePieces)
+                piece.onStatusChanged.connect(self.onPieceClicked)
                 self.pieces.append(piece)
                 self.layout.addWidget(piece, counterX, counterY)
         self.redraw()
 
 
     @pyqtSlot()
-    def updatePieces(self):        
+    def onPieceClicked(self):
         clickedX = self.sender().x
         clickedY = self.sender().y
 
@@ -194,7 +204,7 @@ class ChessBoard(QWidget):
 
     def redraw(self):
         self.labelDeterminant.setText('Determinant: ' + str(np.linalg.det(self.pieceValues)))
-
+        
         for piece in self.pieces:
             piece.update()
 
@@ -215,14 +225,14 @@ class MainWindow(QWidget):
         super(MainWindow, self).__init__()
 
         self.setWindowTitle("Chessboard Puzzle")
-        self.setGeometry(0, 0, 600, 600)
+        self.setGeometry(0, 0, 600, 700)
 
-        layout = QVBoxLayout(self)        
-        layout.setContentsMargins(25, 25, 0, 0)
-        layout.setSpacing(0)
+        self.layout = QVBoxLayout(self)        
+        self.layout.setContentsMargins(25, 25, 25, 25)
+        self.layout.setSpacing(0)
 
         board = ChessBoard(self)
-        layout.addWidget(board)
+        self.layout.addWidget(board)
 
 
 
